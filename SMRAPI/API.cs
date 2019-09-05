@@ -13,8 +13,21 @@ namespace SMRAPI
     /// <summary>
     /// Provides an interface to the satisfactory map repository on cable.ayra.ch
     /// </summary>
+    /// <remarks>
+    /// WARNING!
+    /// This is a reference implementation only that demonstrates all functions for testing purposes.
+    /// It's not recommended that you use it as-is in your own projects but add proper error handling and data processing.
+    /// </remarks>
     public static class API
     {
+        /// <summary>
+        /// Placeholder for authentication URL
+        /// </summary>
+        public const string API_AUTH_URL_PLACEHOLDER = "{URL}";
+        /// <summary>
+        /// Placeholder for the map id
+        /// </summary>
+        public const string API_MAP_ID_PLACEHOLDER = "{URL}";
         /// <summary>
         /// Base URL of the repository
         /// </summary>
@@ -24,9 +37,13 @@ namespace SMRAPI
         /// </summary>
         public const string API_API = API_BASE + "/api";
         /// <summary>
-        /// Placeholder for authentication URL
+        /// URL for downloading maps
         /// </summary>
-        public const string API_AUTH_URL_PLACEHOLDER = "{URL}";
+        public const string API_DOWNLOAD = API_BASE + "/download/?map=" + API_MAP_ID_PLACEHOLDER;
+        /// <summary>
+        /// URL for previewing maps
+        /// </summary>
+        public const string API_PREVIEW = API_BASE + "/preview/?map=" + API_MAP_ID_PLACEHOLDER;
         /// <summary>
         /// Authentication URL
         /// </summary>
@@ -98,6 +115,83 @@ namespace SMRAPI
 
             //Return processed request
             return Request;
+        }
+
+        /// <summary>
+        /// Gets the preview of a save file
+        /// </summary>
+        /// <param name="MapId">Save file id or hidden id</param>
+        /// <returns>Preview data (PNG image), or null on errors</returns>
+        public static byte[] Preview(Guid MapId)
+        {
+            if (MapId == Guid.Empty)
+            {
+                throw new ArgumentNullException(nameof(MapId));
+            }
+            var Request = WebRequest.CreateHttp(API_PREVIEW.Replace(API_MAP_ID_PLACEHOLDER, MapId.ToString()));
+            try
+            {
+                using (var Res = Request.GetResponse())
+                {
+                    using (var MS = new MemoryStream())
+                    {
+                        using (var S = Res.GetResponseStream())
+                        {
+                            S.CopyTo(MS);
+                        }
+                        return MS.ToArray();
+                    }
+                }
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Gets a save file
+        /// </summary>
+        /// <param name="MapId">Save file id or hidden id</param>
+        /// <param name="Output">Stream to write save file to</param>
+        /// <returns><see cref="true"/> on success, <see cref="false"/> on failure</returns>
+        /// <remarks>
+        /// The state of <paramref name="Output"/> is unknown on errors.
+        /// An example would be a connection termination mid transmission.
+        /// </remarks>
+        public static bool Download(Guid MapId, Stream Output)
+        {
+            if (Output == null)
+            {
+                throw new ArgumentNullException(nameof(Output));
+            }
+            if (MapId == Guid.Empty)
+            {
+                throw new ArgumentNullException(nameof(MapId));
+            }
+            if (!Output.CanWrite)
+            {
+                throw new ArgumentException("Stream is not writable", nameof(Output));
+            }
+            var Request = WebRequest.CreateHttp(API_DOWNLOAD.Replace(API_MAP_ID_PLACEHOLDER, MapId.ToString()));
+            //Automatically decompress the data. If not available in your language, use regular gzip decompression.
+            Request.AutomaticDecompression = DecompressionMethods.GZip;
+
+            try
+            {
+                using (var Res = Request.GetResponse())
+                {
+                    using (var S = Res.GetResponseStream())
+                    {
+                        S.CopyTo(Output);
+                    }
+                }
+            }
+            catch
+            {
+                return false;
+            }
+            return true;
         }
 
         /// <summary>
