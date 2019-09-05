@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 
 namespace SMRAPI
 {
@@ -6,26 +7,57 @@ namespace SMRAPI
     {
         static void Main(string[] args)
         {
-            //Use a hardcoded key. Use this method only for yourself
+            //Below are examples of API calls. Uncomment those you want to test
+
+
+
+
+
+            //Desktop folder is used to download the demo map
+            var Desktop = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+
+            //Use a hardcoded key. Use this method only for yourself or testing purposes
             //API.ApiKey = Guid.Parse("YOUR-API-KEY-GOES-HERE");
 
-            //Ask the user for the key
+            //Ask the user for the key instead of hardcoding it
             GetApiKey();
 
-            //Some test and informative API calls
+            //Test and informative API calls
             //var Test = API.Test();
-            //var Info = API.Info();
+            var Info = API.Info();
+
+            //Download preview and file of first map (if available)
+            //This example always uses the hidden_id so we don't have to check for public==1 first.
+            /*
+            if (Info.data.maps != null && Info.data.maps.Length > 0)
+            {
+                var Map = Info.data.maps[0];
+                Console.WriteLine("Saving preview of {0}...", Map.name);
+                File.WriteAllBytes(Path.Combine(Desktop, $"map_{Map.hidden_id}.png"), API.Preview(Map.hidden_id));
+                Console.WriteLine("Saving map...");
+                using (var FS = File.Create(Path.Combine(Desktop, $"map_{Map.hidden_id}.sav")))
+                {
+                    API.Download(Map.hidden_id, FS);
+                }
+            }
+            //*/
+
             //Console.WriteLine(Info.data.user);
 
             //Edit the name of a map
             //var EditResult = API.EditMap(Guid.Parse("YOUR-MAP-ID-GOES-HERE"),"ExPeRiMeNtAl.sAv");
+            //Show new name. Some special characters will be replaced and ".sav" will be lowercase.
             //Console.WriteLine("Result: {0}", EditResult.success ? EditResult.data.name : EditResult.msg);
 
             //Change the hidden Id of a map
             //var IdResult = API.NewId(Guid.Parse("YOUR-MAP-ID-GOES-HERE"));
             //Console.WriteLine("Result: {0}", IdResult.success ? IdResult.data.ToString() : IdResult.msg);
 
-            /* List the first page of maps from all categories
+            //List all pages of maps from all categories
+            //Don't do this in a productive environment as this will get slower as more maps are added.
+            //This code here merely serves as a demonstration of the paging mechanism
+            //We might also add a limitation on this if we see a big impact on the server.
+            /*
             foreach (var Cat in Info.data.categories.list)
             {
                 if (Cat.id > 0)
@@ -37,8 +69,7 @@ namespace SMRAPI
                         Page++;
                         ListResult = API.List(Category: Cat.id, Page: Page);
                         Console.WriteLine("Category={0} Page={1}; Count={2}",
-                            Cat.id,
-                            Page,
+                            Cat.id, Page,
                             ListResult.success ? ListResult.data.maps.Length.ToString() : ListResult.msg);
                     } while (ListResult.data.more);
                 }
@@ -50,7 +81,7 @@ namespace SMRAPI
             //Console.WriteLine("Result: {0}", UploadResult.success ? UploadResult.data.name : UploadResult.msg);
 
 #if DEBUG
-            //Wait for a key in debug mode
+            //Wait for a key in debug mode to allow us to read the console
             Console.Error.WriteLine("#END");
             Console.ReadKey(true);
 #endif
