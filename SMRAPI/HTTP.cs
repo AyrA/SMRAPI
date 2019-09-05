@@ -15,7 +15,7 @@ namespace SMRAPI
     public delegate void ApiKeyEventHandler(object sender, Guid ApiKey);
 
     /// <summary>
-    /// Provides a key tetrieval service
+    /// Provides a key retrieval service demonstration using the windows HTTP API
     /// </summary>
     public class HTTP : IDisposable
     {
@@ -84,7 +84,9 @@ namespace SMRAPI
             //Don't try to change. It must be "localhost" or you must be administrator
             L.Prefixes.Add($"http://localhost:{Port}/");
             //Default authentication URL from API
-            AuthUrl = API.API_AUTH.Replace(API.API_AUTH_URL_PLACEHOLDER, Uri.EscapeDataString(L.Prefixes.First() + "?key={APIKEY}"));
+            AuthUrl = API.API_AUTH
+                .Replace(API.API_AUTH_URL_PLACEHOLDER, Uri.EscapeDataString(L.Prefixes.First() + "?key={APIKEY}"))
+                .Replace(API.API_AUTH_NAME_PLACEHOLDER,Uri.EscapeDataString("SMR Reference Client"));
         }
 
         /// <summary>
