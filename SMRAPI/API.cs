@@ -25,9 +25,13 @@ namespace SMRAPI
         /// </summary>
         public const string API_AUTH_URL_PLACEHOLDER = "{URL}";
         /// <summary>
+        /// Placeholder for application name
+        /// </summary>
+        public const string API_AUTH_NAME_PLACEHOLDER = "{NAME}";
+        /// <summary>
         /// Placeholder for the map id
         /// </summary>
-        public const string API_MAP_ID_PLACEHOLDER = "{URL}";
+        public const string API_MAP_ID_PLACEHOLDER = "{ID}";
         /// <summary>
         /// Base URL of the repository
         /// </summary>
@@ -47,7 +51,7 @@ namespace SMRAPI
         /// <summary>
         /// Authentication URL
         /// </summary>
-        public const string API_AUTH = API_BASE + "/remoteauth/?redir=" + API_AUTH_URL_PLACEHOLDER;
+        public const string API_AUTH = API_BASE + "/remoteauth/?redir=" + API_AUTH_URL_PLACEHOLDER + "&name=" + API_AUTH_NAME_PLACEHOLDER;
 
         /// <summary>
         /// ID that represents an anonymous user
