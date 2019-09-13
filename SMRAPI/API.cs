@@ -431,5 +431,24 @@ namespace SMRAPI
                 }
             }
         }
+
+        /// <summary>
+        /// Gets map details from the repository
+        /// </summary>
+        /// <param name="MapId">Map Id</param>
+        /// <returns>API "details" result</returns>
+        public static MapDetailsResponse Details(Guid MapId)
+        {
+            var Values = new Dictionary<string, object>();
+            Values["id"] = MapId;
+            var R = Req("details", Values);
+            using (var Res = R.GetResponse())
+            {
+                using (var SR = new StreamReader(Res.GetResponseStream()))
+                {
+                    return SR.ReadToEnd().FromXml<MapDetailsResponse>();
+                }
+            }
+        }
     }
 }
